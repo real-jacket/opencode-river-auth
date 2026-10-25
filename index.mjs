@@ -23,6 +23,17 @@ const LIMITS = {
   "Qwen/Qwen3.8-27B-FP8": { context: 262144, output: 262143 },
 }
 
+// Reasoning effort levels per model, from docs.river.ai/guides/inference-controls.
+// The keys are the exact `reasoning_effort` strings River's chat API takes.
+// DeepSeek also takes "none" (off); GLM requires reasoning, so it has none.
+// The 1017 release is the same model re-served, so it takes the same efforts.
+// Nemotron, Qwen3.8 and Kimi-K3 have no documented effort control.
+const VARIANTS = {
+  "deepseek-ai/DeepSeek-V4.1-Flash": { none: {}, high: {}, max: {} },
+  "deepseek-ai/DeepSeek-V4.1-Flash-1017": { none: {}, high: {}, max: {} },
+  "zai-org/GLM-5.3-Flash": { low: {}, high: {}, max: {} },
+}
+
 // Costs at the time of writing, per million tokens in USD, from River's
 // public pricing endpoint (the same rates billing uses). The models hook
 // replaces them with whatever the endpoint lists then.
@@ -39,7 +50,7 @@ const BOOT_PRICES = {
 // streams, reasons and calls tools (docs.river.ai/guides/inference-models).
 // The row carries the fields both readers use: the config hook reads the
 // top-level ones, the models hook reads the `capabilities` object.
-function row(id, name, cost, limit) {
+function row(id, name, cost, limit, variants) {
   return {
     id,
     name,
@@ -54,6 +65,7 @@ function row(id, name, cost, limit) {
       input: { text: true, image: true },
       output: { text: true },
     },
+    ...(variants ? { variants } : {}),
     status: "active",
     ...(cost ? { cost } : {}),
   }
@@ -121,7 +133,7 @@ function rowsFor(ids, prices) {
     ids.map((id) => {
       const price = prices?.[id]
       const cost = costOf(price) ?? costOf(BOOT_PRICES[id])
-      return [id, row(id, pretty(id), cost, LIMITS[id])]
+      return [id, row(id, pretty(id), cost, LIMITS[id], VARIANTS[id])]
     }),
   )
 }
@@ -198,4 +210,4 @@ function createPlugin({ fetchImpl = globalThis.fetch } = {}) {
 // The plugin is the only exported function; magpie calls every exported
 // function as a plugin, so tests reach the internals through this object.
 export const RiverPlugin = async () => createPlugin()
-export const _internal = { createPlugin, row, pretty, costOf, rowsFor, LIMITS, BOOT_PRICES, BASE, PRICING }
+export const _internal = { createPlugin, row, pretty, costOf, rowsFor, LIMITS, VARIANTS, BOOT_PRICES, BASE, PRICING }

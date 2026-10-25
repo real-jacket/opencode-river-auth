@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test"
 import { RiverPlugin, _internal } from "./index.mjs"
 
-const { createPlugin, row, pretty, costOf, rowsFor, LIMITS, BOOT_PRICES, BASE } = _internal
+const { createPlugin, row, pretty, costOf, rowsFor, LIMITS, VARIANTS, BOOT_PRICES, BASE } = _internal
 
 function jsonRes(status, body) {
   return new Response(body === undefined ? null : JSON.stringify(body), {
@@ -155,6 +155,16 @@ describe("helpers", () => {
   test("rowsFor falls back to boot prices without a live list", () => {
     const rows = rowsFor(["zai-org/GLM-5.3-Flash"], null)
     expect(rows["zai-org/GLM-5.3-Flash"].cost).toEqual(costOf(BOOT_PRICES["zai-org/GLM-5.3-Flash"]))
+  })
+  test("rows carry the documented reasoning efforts", () => {
+    const rows = rowsFor(
+      ["deepseek-ai/DeepSeek-V4.1-Flash", "zai-org/GLM-5.3-Flash", "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4"],
+      null,
+    )
+    expect(rows["deepseek-ai/DeepSeek-V4.1-Flash"].variants).toEqual({ none: {}, high: {}, max: {} })
+    expect(rows["zai-org/GLM-5.3-Flash"].variants).toEqual({ low: {}, high: {}, max: {} })
+    expect(rows["nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-NVFP4"].variants).toBeUndefined()
+    expect(Object.keys(VARIANTS)).toHaveLength(3)
   })
 })
 
