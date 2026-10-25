@@ -139,11 +139,18 @@ describe("helpers", () => {
     expect(costOf({})).toBeUndefined()
     expect(costOf(null)).toBeUndefined()
   })
-  test("rows carry image input, tools and reasoning", () => {
+  test("rows carry image input, tools and reasoning in both shapes", () => {
     const r = row("x", "X", undefined, undefined)
     expect(r.limit).toEqual({ context: 0, output: 0 })
     expect(r.modalities.input).toEqual(["text", "image"])
-    expect(r.reasoning && r.tool_call && r.attachment).toBe(true)
+    expect(r.reasoning && r.tool_call).toBe(true)
+    expect(r.capabilities).toEqual({
+      reasoning: true,
+      toolcall: true,
+      attachment: true,
+      input: { text: true, image: true },
+      output: { text: true },
+    })
   })
   test("rowsFor falls back to boot prices without a live list", () => {
     const rows = rowsFor(["zai-org/GLM-5.3-Flash"], null)

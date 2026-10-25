@@ -37,6 +37,8 @@ const BOOT_PRICES = {
 
 // Every model in River's inference list takes text and image input and
 // streams, reasons and calls tools (docs.river.ai/guides/inference-models).
+// The row carries the fields both readers use: the config hook reads the
+// top-level ones, the models hook reads the `capabilities` object.
 function row(id, name, cost, limit) {
   return {
     id,
@@ -44,8 +46,15 @@ function row(id, name, cost, limit) {
     limit: limit ?? { context: 0, output: 0 },
     reasoning: true,
     tool_call: true,
-    attachment: true,
     modalities: { input: ["text", "image"], output: ["text"] },
+    capabilities: {
+      reasoning: true,
+      toolcall: true,
+      attachment: true,
+      input: { text: true, image: true },
+      output: { text: true },
+    },
+    status: "active",
     ...(cost ? { cost } : {}),
   }
 }
