@@ -13,10 +13,14 @@ models like any other provider — multi-account, fallback, quotas and all.
 - **Models**: the models your key can use, listed per account from `GET /v1/models`. Context and
   output limits come from [River's docs](https://docs.river.ai/guides/inference-models/); prices
   come from [River's public pricing endpoint](https://console.river.ai/api/public/pricing), the
-  same rates billing uses.
-- **Requests**: chat completions through `@ai-sdk/openai-compatible` — text and image input,
-  streaming, reasoning and tool calls on every inference model. magpie translates whatever the
-  agent speaks (Anthropic Messages, Responses, Gemini) into it.
+  same rates billing uses. The documented reasoning efforts
+  ([API controls](https://docs.river.ai/guides/inference-controls/)) ride along: DeepSeek-V4.1-Flash
+  `none`/`low`/`high`/`max`, Kimi-K3 `none`/`max`, Nemotron `none`/`high`, GLM-5.3-Flash
+  `low`/`high`/`max` (reasoning required), Qwen3.8-27B-FP8 `none`/`low`/`medium`/`xhigh`.
+- **Requests**: chat completions through `@ai-sdk/openai-compatible` — streaming, reasoning and
+  tool calls on every inference model, image input only on the models the docs list for it
+  (GLM-5.3 is text-only, and a model the docs don't list yet defaults to text-only). magpie
+  translates whatever the agent speaks (Anthropic Messages, Responses, Gemini) into it.
 - **Usage**: River meters a prepaid balance per request and publishes no endpoint that reads it,
   so the usage card shows the sign-in state and "Pay as you go" rather than invented numbers;
   spend and balance live in the [River Console](https://console.river.ai/).
